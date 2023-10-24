@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: route1
+          uri: http://httpbin.org
+          predicates:
+            - Path=/get
+            - Header= Accept,application/json
+            - Header= Name,Pabitra Bera
+          #   you can use -Header=header_name,header_value
+          #   or you can use filters:
+          #                    - AddRequestHeader=header_name,header_value
+          filters:
+            - AddRequestHeader=Add-Custom-Request-Header,header_value
+
+        - id: route2
+          uri: http://localhost:8081
+          predicates:
+            - Path=/demo/**
+          # - Header=header_name,header_value # this header is mandatory for the client to send requests to the downstream else it will throw an error
+          filters:
+            - AddRequestHeader=header_name,header_value # [this is optional] it is used to send this header to the downstream services you can get using @RequestHeader("header_name") in controller within method parameters
+            - RoleAuth= # naming convention if you name the filter like XyzGatewayFilterFactory then write :- Xyz=
+
+#              C:\Users\pabit>curl -X GET "http://httpbin.org/get"
+#              -H "accept: application/json" -H "Name: Pabitra Bera" -H "Add-Custom-Request-Header: header_value"
+#              {"args":{},"headers":{"Accept":"application/json","Add-Custom-Request-Header":"header_value","Name":"Pabitra Bera"},"origin":"244.178.44.111","url":"http://httpbin.org/get"}
